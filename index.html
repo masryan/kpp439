@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polling Pegawai Terbaik PPNPN</title>
+  <style>
+    body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px 10px; color: #333; }
+    .container { max-width: 700px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+    .header-banner { background-color: #004a99; color: #fff; padding: 25px 20px; text-align: center; transition: background 0.3s; }
+    .header-banner h3 { margin: 0 0 5px 0; font-size: 23px; }
+    .header-banner p { margin: 0; font-size: 15px; opacity: 0.9; }
+    .card-body { padding: 25px; }
+    h5.section-title { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; margin-bottom: 20px; font-size: 17px; color: #004a99; }
+    .form-group { margin-bottom: 18px; }
+    label.fw-bold { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
+    input[type="text"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: inherit; }
+    input[type="text"]:focus, select:focus, textarea:focus { border-color: #004a99; outline: none; }
+    .card-cs { border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px; margin-bottom: 25px; background-color: #fafafa; }
+    .cs-profile { text-align: center; margin-bottom: 15px; }
+    .cs-profile img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+    .cs-profile h4 { margin: 10px 0 0 0; color: #333; font-size: 17px; }
+    hr.divider { border: 0; border-top: 1px dashed #ccc; margin: 15px 0; }
+    .kriteria-row { margin-bottom: 12px; }
+    .kriteria-label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; font-size: 32px; line-height: 1; }
+    .star-rating input { display: none; }
+    .star-rating label { color: #dcdcdc; cursor: pointer; transition: color 0.15s; margin-right: 6px; }
+    .star-rating input:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: #ffc107; }
+    .btn-submit { background-color: #28a745; color: white; border: none; width: 100%; padding: 15px; font-size: 17px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; }
+    .btn-submit:hover { background-color: #218838; }
+    .btn-submit:disabled { background-color: #94d3a2; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="banner" class="header-banner">
+    <h3>Polling Pegawai Terbaik PPNPN</h3>
+    <p id="sub-banner">Silakan lengkapi data dan penilaian Anda</p>
+  </div>
+  
+  <div class="card-body">
+    <form id="pollingForm" onsubmit="submitData(event)">
+      
+      <h5 class="section-title">Identitas Responden</h5>
+      <div class="form-group">
+        <label class="fw-bold">NIP (9 Digit)</label>
+        <input type="text" id="nip" pattern="\d{9}" maxlength="9" placeholder="Masukkan 9 digit NIP" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+      </div>
+      <div class="form-group">
+        <label class="fw-bold">Unit Organisasi (Seksi)</label>
+        <select id="seksi" required>
+          <option value="" selected disabled>-- Pilih Seksi --</option>
+          <option value="Subbagian Umum dan Kepatuhan Internal">Subbagian Umum dan Kepatuhan Internal</option>
+          <option value="Seksi Penjamin Kualitas Data">Seksi Penjamin Kualitas Data</option>
+          <option value="Seksi Pelayanan">Seksi Pelayanan</option>
+          <option value="Seksi Pemeriksaan, Penilaian, dan Penagihan">Seksi Pemeriksaan, Penilaian, dan Penagihan</option>
+          <option value="Seksi Pengawasan I">Seksi Pengawasan I</option>
+          <option value="Seksi Pengawasan II">Seksi Pengawasan II</option>
+          <option value="Seksi Pengawasan III">Seksi Pengawasan III</option>
+          <option value="Seksi Pengawasan IV">Seksi Pengawasan IV</option>
+          <option value="Seksi Pengawasan V">Seksi Pengawasan V</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="fw-bold">Kategori Pegawai Yang Dinilai</label>
+        <select id="kategori" onchange="ubahKategori(this.value)" required>
+          <option value="" selected disabled>-- Pilih Kategori --</option>
+          <option value="cs">Cleaning Service</option>
+          <option value="security">Security (Satpam)</option>
+        </select>
+      </div>
+
+      <div id="penilaian-section" style="display:none;">
+        <br>
+        <h5 class="section-title" id="title-penilaian">Daftar Pegawai</h5>
+        <div id="pegawai-container"></div>
+        <button type="submit" id="btnSubmit" class="btn-submit">Kirim Penilaian</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Database Master Data Pegawai PPNPN dengan Nama CS Terbaru
+  const masterData = {
+    cs: {
+      kriteria: [
+        { key: "k1", label: "1. Kualitas Kebersihan" },
+        { key: "k2", label: "2. Kedisiplinan" },
+        { key: "k3", label: "3. Tanggung Jawab" },
+        { key: "k4", label: "4. Sikap dan Perilaku" }
+      ],
+      pegawai: [
+        { id: 1, nama: "Andang Kusnandar", foto: "https://i.ibb.co.com/93t8bqFb/Andang.jpg" },
+        { id: 2, nama: "Dede Saripudin", foto: "https://i.ibb.co.com/xthYK658/Dede.png" },
+        { id: 3, nama: "Mustikandryna Okeu Imalyana", foto: "https://i.ibb.co.com/qv5KVH8/Mustika.png" },
+        { id: 4, nama: "Arif Saefudin", foto: "https://i.ibb.co.com/SD4Zw9h6/Arif.png" },
+        { id: 5, nama: "Latief Maulana", foto: "https://i.ibb.co.com/G4xrxWv8/Latief.png" },
+        { id: 6, nama: "Sopiyan Sopandi", foto: "https://via.placeholder.com/150" },
+        { id: 7, nama: "Prastyo Panca Putra", foto: "https://i.ibb.co.com/YFmpFBwv/Prasetyo.png" },
+        { id: 8, nama: "Yuyun Yunengsih", foto: "https://i.ibb.co.com/R4gk70M5/Yuyun.png" },
+        { id: 9, nama: "Vina Valentina", foto: "https://i.ibb.co.com/GDkbw26/Vina.png" }
+      ]
+    },
+    security: {
+      kriteria: [
+        { key: "k1", label: "1. Disiplin" },
+        { key: "k2", label: "2. Sikap dan Keramahan" },
+        { key: "k3", label: "3. Responsif" },
+        { key: "k4", label: "4. Tanggung Jawab" }
+      ],
+      pegawai: [
+        { id: 1, nama: "Nono Suhartono", foto: "https://i.ibb.co.com/ksq8ZwsB/Nono.png" },
+        { id: 2, nama: "Rahmat Hidayat", foto: "https://i.ibb.co.com/Z6gRPzQR/Rahmat.png" },
+        { id: 3, nama: "Teten Hermawan", foto: "https://i.ibb.co.com/9kNcpScq/Teten.png" },
+        { id: 4, nama: "Alit Supriatna", foto: "https://i.ibb.co.com/7x2jDcYq/Alif.png" },
+        { id: 5, nama: "Salman Mulyono", foto: "https://i.ibb.co.com/kgsHcXDY/Salman.png" },
+        { id: 6, nama: "Entis Sutisna", foto: "https://i.ibb.co.com/YTJPRm6K/Entis.png" },
+        { id: 7, nama: "Yulia Nendasari", foto: "https://i.ibb.co.com/rfN9z7bH/Yulia.png" },
+        { id: 8, nama: "Fajar Gilang Oktiana", foto: "https://i.ibb.co.com/6cWbMBrj/Fajar.png" },
+        { id: 9, nama: "Didin Nurdiansyah", foto: "https://i.ibb.co.com/t0x9VY6/Didin.png" },
+        { id: 10, nama: "Wartono", foto: "https://i.ibb.co.com/t0x9VY6/Didin.png" }
+
+      ]
+    }
+  };
+
+  function ubahKategori(kat) {
+    if(!kat) return;
+    
+    let banner = document.getElementById('banner');
+    let subBanner = document.getElementById('sub-banner');
+    let titlePenilaian = document.getElementById('title-penilaian');
+    
+    if(kat === 'cs') {
+      banner.style.backgroundColor = '#004a99';
+      subBanner.innerText = "Kategori: Cleaning Service";
+      titlePenilaian.innerText = "Penilaian Pegawai Cleaning Service (9 Orang)";
+    } else {
+      banner.style.backgroundColor = '#d35400';
+      subBanner.innerText = "Kategori: Security (Satpam)";
+      titlePenilaian.innerText = "Penilaian Personel Security (9 Orang)";
+    }
+    
+    renderCards(kat);
+    document.getElementById('penilaian-section').style.display = 'block';
+  }
+
+  function renderCards(kat) {
+    let target = masterData[kat];
+    let html = '';
+    
+    target.pegawai.forEach(function(p) {
+      html += '<div class="card-cs">';
+      html += '<div class="cs-profile">';
+      html += '<img src="' + p.foto + '" alt="Foto ' + p.nama + '">';
+      html += '<h4>' + p.nama + '</h4>';
+      html += '</div>';
+      html += '<hr class="divider">';
+      
+      target.kriteria.forEach(function(k) {
+        html += '<div class="kriteria-row">';
+        html += '<div class="kriteria-label">' + k.label + '</div>';
+        html += '<div class="star-rating">';
+        for(let i=5; i>=1; i--) {
+          let rId = 'star_' + i + '_' + k.key + '_' + p.id;
+          let rName = k.key + '_' + p.id;
+          html += '<input type="radio" id="' + rId + '" name="' + rName + '" value="' + i + '" required>';
+          html += '<label for="' + rId + '">★</label>';
+        }
+        html += '</div></div>';
+      });
+
+      html += '<div class="kriteria-row" style="margin-top:15px;">';
+      html += '<label class="kriteria-label">Masukan / Saran:</label>';
+      html += '<textarea id="masukan_' + p.id + '" rows="2" placeholder="Tuliskan masukan untuk ' + p.nama + '..."></textarea>';
+      html += '</div>';
+      html += '</div>';
+    });
+    
+    document.getElementById('pegawai-container').innerHTML = html;
+  }
+
+  function submitData(e) {
+    e.preventDefault();
+    let btn = document.getElementById('btnSubmit');
+    let kat = document.getElementById('kategori').value;
+    btn.disabled = true;
+    btn.innerText = "Menyimpan Data...";
+
+    let payload = {
+      nip: document.getElementById('nip').value,
+      seksi: document.getElementById('seksi').value,
+      kategori: kat,
+      penilaian: []
+    };
+
+    try {
+      masterData[kat].pegawai.forEach(function(p) {
+        let v1 = document.querySelector('input[name="k1_' + p.id + '"]:checked').value;
+        let v2 = document.querySelector('input[name="k2_' + p.id + '"]:checked').value;
+        let v3 = document.querySelector('input[name="k3_' + p.id + '"]:checked').value;
+        let v4 = document.querySelector('input[name="k4_' + p.id + '"]:checked').value;
+        let msk = document.getElementById('masukan_' + p.id).value;
+        
+        payload.penilaian.push({
+          namaPegawai: p.nama, kriteria1: v1, kriteria2: v2, kriteria3: v3, kriteria4: v4, masukan: msk
+        });
+      });
+
+      google.script.run.withSuccessHandler(function(res) {
+        if(res === "SUCCESS") {
+          alert("Terima kasih! Polling berhasil disimpan.");
+          document.getElementById('pollingForm').reset();
+          document.getElementById('penilaian-section').style.display = 'none';
+          window.scrollTo(0,0);
+        } else {
+          alert("Gagal menyimpan: " + res);
+        }
+        btn.disabled = false;
+        btn.innerText = "Kirim Penilaian";
+      }).simpanPolling(payload);
+
+    } catch(err) {
+      alert("Mohon pastikan seluruh bintang penilaian sudah terisi.");
+      btn.disabled = false;
+      btn.innerText = "Kirim Penilaian";
+    }
+  }
+</script>
+</body>
+</html>
