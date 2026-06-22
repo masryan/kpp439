@@ -1,0 +1,9 @@
+# Google Apps Script
+.appsscript.json
+
+# Spreadsheet ID (jangan upload ID asli)
+# Ganti dengan placeholder
+
+# File temporary
+*.tmp
+.DS_Store
