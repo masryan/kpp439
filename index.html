@@ -280,7 +280,6 @@
           </div>
         </div>
         
-        <!-- Detail Dalam Kota -->
         <div class="form-row full tujuan-detail show" id="detailDalamKota">
           <div class="form-group">
             <label for="tujuanDalamKota">Detail Tujuan Dalam Kota</label>
@@ -288,7 +287,6 @@
           </div>
         </div>
         
-        <!-- Detail Luar Kota -->
         <div class="form-row full tujuan-detail" id="detailLuarKota">
           <div class="form-group">
             <label for="kotaTujuan">Kota Tujuan</label>
@@ -338,7 +336,6 @@
     <div class="container">
       <div class="alert" id="alertAdmin"></div>
       
-      <!-- RINGKASAN -->
       <div class="ringkasan-row">
         <div class="ringkasan-card tersedia">
           <h4>Mobil Tersedia</h4>
@@ -354,14 +351,12 @@
         </div>
       </div>
       
-      <!-- TABS -->
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('menunggu', this)">Persetujuan</button>
         <button class="tab-btn" onclick="switchTab('disetujui', this)">Sedang Dipinjam</button>
         <button class="tab-btn" onclick="switchTab('semua', this)">Semua Riwayat</button>
       </div>
       
-      <!-- CARD PERSETUJUAN -->
       <div class="card" id="cardMenunggu">
         <h3>Daftar Persetujuan Peminjaman</h3>
         <div class="table-wrapper">
@@ -379,7 +374,6 @@
         </div>
       </div>
       
-      <!-- CARD SEDANG DIPINJAM -->
       <div class="card hidden" id="cardDisetujui">
         <h3>Daftar Mobil Sedang Dipinjam</h3>
         <div class="table-wrapper">
@@ -397,7 +391,6 @@
         </div>
       </div>
       
-      <!-- CARD SEMUA RIWAYAT -->
       <div class="card hidden" id="cardSemua">
         <h3>Semua Riwayat Peminjaman</h3>
         <div class="table-wrapper">
@@ -430,23 +423,31 @@
   </div>
 
   <script>
+    console.log('SiMoDi: Script loaded');
+
     // ==================== GLOBAL VARIABLES ====================
     let currentToken = null;
     let currentUser = null;
     let selectedIdTolak = null;
 
     // ==================== LOADING HELPERS ====================
-    function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
-    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+    function showLoading() { 
+      console.log('showLoading');
+      document.getElementById('loadingOverlay').classList.add('show'); 
+    }
+    function hideLoading() { 
+      console.log('hideLoading');
+      document.getElementById('loadingOverlay').classList.remove('show'); 
+    }
 
     // ==================== INISIALISASI ====================
     document.addEventListener('DOMContentLoaded', function() {
-      // LANGSUNG TAMPILKAN LOGIN
+      console.log('DOMContentLoaded: Menampilkan halaman login');
       showLogin();
       
-      // Enter key untuk login
       document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !document.getElementById('pageLogin').classList.contains('hidden')) {
+          console.log('Enter key pressed on login page');
           handleLogin();
         }
       });
@@ -454,6 +455,7 @@
 
     // ==================== NAVIGASI HALAMAN ====================
     function showLogin() {
+      console.log('showLogin');
       document.getElementById('pageLogin').classList.remove('hidden');
       document.getElementById('pagePegawai').classList.add('hidden');
       document.getElementById('pageAdmin').classList.add('hidden');
@@ -463,41 +465,60 @@
     }
 
     function showPegawaiDashboard() {
-      document.getElementById('pageLogin').classList.add('hidden');
-      document.getElementById('pagePegawai').classList.remove('hidden');
-      document.getElementById('pageAdmin').classList.add('hidden');
+      console.log('showPegawaiDashboard: Mulai');
       
-      document.getElementById('namaPegawai').innerText = currentUser.nama;
-      document.getElementById('infoPegawai').innerText = 'Selamat Datang, ' + currentUser.nama + ' | Unit: ' + currentUser.unit;
-      
-      // Set tanggal default
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('tglPinjam').value = today;
-      document.getElementById('tglKembali').value = today;
-      document.getElementById('jamPinjam').value = '08:00';
-      document.getElementById('jamKembali').value = '12:00';
-      
-      // Load data
-      loadMobilTersedia();
-      loadRiwayat();
+      try {
+        document.getElementById('pageLogin').classList.add('hidden');
+        document.getElementById('pagePegawai').classList.remove('hidden');
+        document.getElementById('pageAdmin').classList.add('hidden');
+        console.log('showPegawaiDashboard: Halaman ditampilkan');
+        
+        document.getElementById('namaPegawai').innerText = currentUser.nama;
+        document.getElementById('infoPegawai').innerText = 'Selamat Datang, ' + currentUser.nama + ' | Unit: ' + currentUser.unit;
+        
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tglPinjam').value = today;
+        document.getElementById('tglKembali').value = today;
+        document.getElementById('jamPinjam').value = '08:00';
+        document.getElementById('jamKembali').value = '12:00';
+        
+        console.log('showPegawaiDashboard: Loading mobil...');
+        loadMobilTersedia();
+        console.log('showPegawaiDashboard: Loading riwayat...');
+        loadRiwayat();
+        console.log('showPegawaiDashboard: Selesai');
+      } catch(e) {
+        console.error('showPegawaiDashboard ERROR:', e);
+        alert('Error: ' + e.message);
+      }
     }
 
     function showAdminDashboard() {
-      document.getElementById('pageLogin').classList.add('hidden');
-      document.getElementById('pagePegawai').classList.add('hidden');
-      document.getElementById('pageAdmin').classList.remove('hidden');
+      console.log('showAdminDashboard: Mulai');
       
-      document.getElementById('namaAdmin').innerText = currentUser.nama;
-      
-      // Reset tabs
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('.tab-btn').classList.add('active');
-      document.getElementById('cardMenunggu').classList.remove('hidden');
-      document.getElementById('cardDisetujui').classList.add('hidden');
-      document.getElementById('cardSemua').classList.add('hidden');
-      
-      loadRingkasan();
-      loadDataMenunggu();
+      try {
+        document.getElementById('pageLogin').classList.add('hidden');
+        document.getElementById('pagePegawai').classList.add('hidden');
+        document.getElementById('pageAdmin').classList.remove('hidden');
+        console.log('showAdminDashboard: Halaman ditampilkan');
+        
+        document.getElementById('namaAdmin').innerText = currentUser.nama;
+        
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.tab-btn').classList.add('active');
+        document.getElementById('cardMenunggu').classList.remove('hidden');
+        document.getElementById('cardDisetujui').classList.add('hidden');
+        document.getElementById('cardSemua').classList.add('hidden');
+        
+        console.log('showAdminDashboard: Loading ringkasan...');
+        loadRingkasan();
+        console.log('showAdminDashboard: Loading data menunggu...');
+        loadDataMenunggu();
+        console.log('showAdminDashboard: Selesai');
+      } catch(e) {
+        console.error('showAdminDashboard ERROR:', e);
+        alert('Error: ' + e.message);
+      }
     }
 
     // ==================== LOGIN ====================
@@ -516,12 +537,14 @@
         return;
       }
       
+      console.log('LOGIN: Mengirim NIP=' + nip);
       showLoading();
       btnLogin.disabled = true;
       btnLogin.innerText = 'Memproses...';
       
       google.script.run
         .withSuccessHandler(function(res) {
+          console.log('LOGIN: Response =', JSON.stringify(res));
           hideLoading();
           btnLogin.disabled = false;
           btnLogin.innerText = 'Masuk';
@@ -534,10 +557,16 @@
             document.getElementById('nip').value = '';
             document.getElementById('password').value = '';
             
+            console.log('LOGIN: Role =', res.role);
+            
             if (res.role === 'pegawai') {
               showPegawaiDashboard();
             } else if (res.role === 'admin') {
               showAdminDashboard();
+            } else {
+              console.error('LOGIN: Role tidak dikenal:', res.role);
+              errorDiv.innerText = 'Role tidak dikenal.';
+              errorDiv.classList.add('show');
             }
           } else {
             errorDiv.innerText = res.message;
@@ -545,18 +574,19 @@
           }
         })
         .withFailureHandler(function(err) {
+          console.error('LOGIN: Gagal', err);
           hideLoading();
           btnLogin.disabled = false;
           btnLogin.innerText = 'Masuk';
-          errorDiv.innerText = 'Gagal koneksi. Coba lagi.';
+          errorDiv.innerText = 'Gagal koneksi. (Lihat console F12)';
           errorDiv.classList.add('show');
-          console.error('Login error:', err);
         })
         .login(nip, password);
     }
 
     // ==================== LOGOUT ====================
     function handleLogout() {
+      console.log('LOGOUT');
       showLoading();
       if (currentToken) {
         google.script.run
@@ -571,12 +601,14 @@
 
     // ==================== PEGAWAI: LOAD MOBIL TERSEDIA ====================
     function loadMobilTersedia() {
+      console.log('loadMobilTersedia: Mulai');
       const select = document.getElementById('mobil');
       select.innerHTML = '<option value="">-- Memuat data mobil --</option>';
       
       google.script.run
         .withSuccessHandler(function(list) {
-          console.log('Mobil tersedia:', JSON.stringify(list));
+          console.log('loadMobilTersedia: Data diterima, jumlah:', list ? list.length : 0);
+          console.log('loadMobilTersedia: Data:', JSON.stringify(list));
           
           select.innerHTML = '<option value="">-- Pilih Mobil --</option>';
           
@@ -588,10 +620,12 @@
           list.forEach(function(m) {
             select.innerHTML += '<option value="' + m.id + '">' + m.nama + ' (' + m.plat + ')</option>';
           });
+          
+          console.log('loadMobilTersedia: Selesai');
         })
         .withFailureHandler(function(err) {
-          console.error('Gagal load mobil:', err);
-          select.innerHTML = '<option value="">-- Gagal memuat, refresh halaman --</option>';
+          console.error('loadMobilTersedia: Gagal', err);
+          select.innerHTML = '<option value="">-- Gagal memuat --</option>';
         })
         .getMobilTersedia();
     }
@@ -601,7 +635,6 @@
       const selected = document.querySelector('input[name="tujuan"]:checked').value;
       document.getElementById('detailDalamKota').classList.remove('show');
       document.getElementById('detailLuarKota').classList.remove('show');
-      
       if (selected === 'dalam_kota') {
         document.getElementById('detailDalamKota').classList.add('show');
       } else {
@@ -627,27 +660,15 @@
         detailTujuan = 'Kota ' + kota + ' - ' + kegiatan;
       }
       
-      // Validasi
-      if (!idMobil) {
-        showAlertPegawai('Silakan pilih mobil.', 'error');
-        return;
-      }
-      if (!tglPinjam || !jamPinjam || !tglKembali || !jamKembali) {
-        showAlertPegawai('Tanggal dan jam harus diisi lengkap.', 'error');
-        return;
-      }
-      if (!detailTujuan || detailTujuan === 'Kota  - ') {
-        showAlertPegawai('Detail tujuan harus diisi.', 'error');
-        return;
-      }
+      if (!idMobil) { showAlertPegawai('Silakan pilih mobil.', 'error'); return; }
+      if (!tglPinjam || !jamPinjam || !tglKembali || !jamKembali) { showAlertPegawai('Isi tanggal lengkap.', 'error'); return; }
+      if (!detailTujuan || detailTujuan === 'Kota  - ') { showAlertPegawai('Isi detail tujuan.', 'error'); return; }
       
       const pinjam = new Date(tglPinjam + 'T' + jamPinjam);
       const kembali = new Date(tglKembali + 'T' + jamKembali);
-      if (pinjam >= kembali) {
-        showAlertPegawai('Tanggal/jam kembali harus setelah pinjam.', 'error');
-        return;
-      }
+      if (pinjam >= kembali) { showAlertPegawai('Tanggal kembali harus setelah pinjam.', 'error'); return; }
       
+      console.log('ajukanPeminjaman: Mobil=' + idMobil);
       showLoading();
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
@@ -655,13 +676,13 @@
       
       google.script.run
         .withSuccessHandler(function(res) {
+          console.log('ajukanPeminjaman: Response =', JSON.stringify(res));
           hideLoading();
           btn.disabled = false;
           btn.innerText = 'Ajukan Peminjaman';
           
           if (res.success) {
             showAlertPegawai(res.message, 'success');
-            // Reset form
             document.getElementById('tujuanDalamKota').value = '';
             document.getElementById('kotaTujuan').value = '';
             document.getElementById('kegiatanLuarKota').value = '';
@@ -672,21 +693,25 @@
           }
         })
         .withFailureHandler(function(err) {
+          console.error('ajukanPeminjaman: Gagal', err);
           hideLoading();
           btn.disabled = false;
           btn.innerText = 'Ajukan Peminjaman';
-          showAlertPegawai('Gagal mengirim: ' + err.message, 'error');
+          showAlertPegawai('Gagal mengirim.', 'error');
         })
         .ajukanPeminjaman(currentToken, idMobil, tglPinjam, jamPinjam, tglKembali, jamKembali, jenisTujuan, detailTujuan);
     }
 
     // ==================== PEGAWAI: LOAD RIWAYAT ====================
     function loadRiwayat() {
+      console.log('loadRiwayat: Mulai');
       const tbody = document.getElementById('tableRiwayat');
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>';
       
       google.script.run
         .withSuccessHandler(function(data) {
+          console.log('loadRiwayat: Data diterima, jumlah:', data ? data.length : 0);
+          
           if (!data || data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Belum ada riwayat peminjaman.</td></tr>';
             return;
@@ -713,8 +738,10 @@
           });
           
           tbody.innerHTML = html;
+          console.log('loadRiwayat: Selesai');
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          console.error('loadRiwayat: Gagal', err);
           tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
         })
         .getRiwayatPeminjaman(currentToken);
@@ -729,8 +756,10 @@
 
     // ==================== ADMIN: LOAD RINGKASAN ====================
     function loadRingkasan() {
+      console.log('loadRingkasan: Mulai');
       google.script.run
         .withSuccessHandler(function(list) {
+          console.log('loadRingkasan: Data mobil =', JSON.stringify(list));
           let tersedia = 0, dipakai = 0;
           if (Array.isArray(list)) {
             list.forEach(function(m) {
@@ -741,29 +770,32 @@
           document.getElementById('jmlTersedia').innerText = tersedia;
           document.getElementById('jmlDipakai').innerText = dipakai;
         })
-        .withFailureHandler(function() {
-          document.getElementById('jmlTersedia').innerText = '?';
-          document.getElementById('jmlDipakai').innerText = '?';
+        .withFailureHandler(function(err) {
+          console.error('loadRingkasan mobil: Gagal', err);
         })
         .getRingkasanMobil(currentToken);
       
-      google.scriptRun
+      google.script.run
         .withSuccessHandler(function(data) {
+          console.log('loadRingkasan: Pengajuan menunggu =', data ? data.length : 0);
           document.getElementById('jmlMenunggu').innerText = Array.isArray(data) ? data.length : '?';
         })
-        .withFailureHandler(function() {
-          document.getElementById('jmlMenunggu').innerText = '?';
+        .withFailureHandler(function(err) {
+          console.error('loadRingkasan pengajuan: Gagal', err);
         })
         .getPengajuanMenunggu(currentToken);
     }
 
     // ==================== ADMIN: LOAD DATA MENUNGGU ====================
     function loadDataMenunggu() {
+      console.log('loadDataMenunggu: Mulai');
       const tbody = document.getElementById('tableMenunggu');
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Memuat data...</td></tr>';
       
       google.script.run
         .withSuccessHandler(function(data) {
+          console.log('loadDataMenunggu: Data =', JSON.stringify(data));
+          
           if (data && data.error) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">' + data.message + '</td></tr>';
             return;
@@ -794,8 +826,10 @@
           
           tbody.innerHTML = html;
           document.getElementById('jmlMenunggu').innerText = data.length;
+          console.log('loadDataMenunggu: Selesai');
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          console.error('loadDataMenunggu: Gagal', err);
           tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
         })
         .getPengajuanMenunggu(currentToken);
@@ -803,12 +837,14 @@
 
     // ==================== ADMIN: LOAD DATA DISETUJUI ====================
     function loadDataDisetujui() {
+      console.log('loadDataDisetujui: Mulai');
       const tbody = document.getElementById('tableDisetujui');
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>';
       
       google.script.run
         .withSuccessHandler(function(data) {
           const list = Array.isArray(data) ? data.filter(item => item.status === 'disetujui') : [];
+          console.log('loadDataDisetujui: ' + list.length + ' data');
           
           if (list.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tidak ada mobil sedang dipinjam.</td></tr>';
@@ -828,20 +864,24 @@
           });
           
           tbody.innerHTML = html;
+          console.log('loadDataDisetujui: Selesai');
         })
-        .withFailureHandler(function() {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        .withFailureHandler(function(err) {
+          console.error('loadDataDisetujui: Gagal', err);
         })
         .getAllPeminjaman(currentToken);
     }
 
     // ==================== ADMIN: LOAD SEMUA DATA ====================
     function loadDataSemua() {
+      console.log('loadDataSemua: Mulai');
       const tbody = document.getElementById('tableSemua');
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>';
       
       google.script.run
         .withSuccessHandler(function(data) {
+          console.log('loadDataSemua: ' + (data ? data.length : 0) + ' data');
+          
           if (!Array.isArray(data) || data.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Belum ada data peminjaman.</td></tr>';
             return;
@@ -868,20 +908,23 @@
           });
           
           tbody.innerHTML = html;
+          console.log('loadDataSemua: Selesai');
         })
-        .withFailureHandler(function() {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        .withFailureHandler(function(err) {
+          console.error('loadDataSemua: Gagal', err);
         })
         .getAllPeminjaman(currentToken);
     }
 
     // ==================== ADMIN: AKSI ====================
     function setujui(id) {
+      console.log('setujui: ID=' + id);
       if (!confirm('Setujui peminjaman ini?')) return;
       
       showLoading();
       google.script.run
         .withSuccessHandler(function(res) {
+          console.log('setujui: Response =', JSON.stringify(res));
           hideLoading();
           if (res.success) {
             showAlertAdmin(res.message, 'success');
@@ -891,7 +934,8 @@
             showAlertAdmin(res.message, 'error');
           }
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          console.error('setujui: Gagal', err);
           hideLoading();
           showAlertAdmin('Gagal memproses.', 'error');
         })
@@ -913,10 +957,12 @@
       if (!selectedIdTolak) return;
       
       const alasan = document.getElementById('alasanTolak').value.trim() || 'Tanpa alasan';
+      console.log('konfirmasiTolak: ID=' + selectedIdTolak + ' Alasan=' + alasan);
       
       showLoading();
       google.script.run
         .withSuccessHandler(function(res) {
+          console.log('konfirmasiTolak: Response =', JSON.stringify(res));
           hideLoading();
           closeModalTolak();
           if (res.success) {
@@ -927,7 +973,8 @@
             showAlertAdmin(res.message, 'error');
           }
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          console.error('konfirmasiTolak: Gagal', err);
           hideLoading();
           closeModalTolak();
           showAlertAdmin('Gagal memproses.', 'error');
@@ -936,11 +983,13 @@
     }
 
     function konfirmasiSelesai(id) {
+      console.log('konfirmasiSelesai: ID=' + id);
       if (!confirm('Konfirmasi mobil sudah kembali?')) return;
       
       showLoading();
       google.script.run
         .withSuccessHandler(function(res) {
+          console.log('konfirmasiSelesai: Response =', JSON.stringify(res));
           hideLoading();
           if (res.success) {
             showAlertAdmin(res.message, 'success');
@@ -950,15 +999,16 @@
             showAlertAdmin(res.message, 'error');
           }
         })
-        .withFailureHandler(function() {
+        .withFailureHandler(function(err) {
+          console.error('konfirmasiSelesai: Gagal', err);
           hideLoading();
           showAlertAdmin('Gagal memproses.', 'error');
         })
         .konfirmasiSelesai(currentToken, id);
     }
 
-    // ==================== ADMIN: SWITCH TAB ====================
     function switchTab(tab, btn) {
+      console.log('switchTab: ' + tab);
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
