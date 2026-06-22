@@ -1,234 +1,989 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
+  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Polling Pegawai Terbaik PPNPN</title>
+  <title>SiMoDi - Sistem Mobil Dinas</title>
   <style>
-    body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px 10px; color: #333; }
-    .container { max-width: 700px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
-    .header-banner { background-color: #004a99; color: #fff; padding: 25px 20px; text-align: center; transition: background 0.3s; }
-    .header-banner h3 { margin: 0 0 5px 0; font-size: 23px; }
-    .header-banner p { margin: 0; font-size: 15px; opacity: 0.9; }
-    .card-body { padding: 25px; }
-    h5.section-title { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; margin-bottom: 20px; font-size: 17px; color: #004a99; }
-    .form-group { margin-bottom: 18px; }
-    label.fw-bold { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
-    input[type="text"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; font-family: inherit; }
-    input[type="text"]:focus, select:focus, textarea:focus { border-color: #004a99; outline: none; }
-    .card-cs { border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px; margin-bottom: 25px; background-color: #fafafa; }
-    .cs-profile { text-align: center; margin-bottom: 15px; }
-    .cs-profile img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
-    .cs-profile h4 { margin: 10px 0 0 0; color: #333; font-size: 17px; }
-    hr.divider { border: 0; border-top: 1px dashed #ccc; margin: 15px 0; }
-    .kriteria-row { margin-bottom: 12px; }
-    .kriteria-label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-    .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; font-size: 32px; line-height: 1; }
-    .star-rating input { display: none; }
-    .star-rating label { color: #dcdcdc; cursor: pointer; transition: color 0.15s; margin-right: 6px; }
-    .star-rating input:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: #ffc107; }
-    .btn-submit { background-color: #28a745; color: white; border: none; width: 100%; padding: 15px; font-size: 17px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; }
-    .btn-submit:hover { background-color: #218838; }
-    .btn-submit:disabled { background-color: #94d3a2; cursor: not-allowed; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+    .hidden { display: none !important; }
+
+    /* LOADING OVERLAY */
+    .loading-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.85); z-index: 9999;
+      justify-content: center; align-items: center; flex-direction: column;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 50px; height: 50px; border: 5px solid #e0e0e0;
+      border-top: 5px solid #667eea; border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-overlay p { margin-top: 15px; color: #555; font-size: 14px; }
+
+    /* LOGIN */
+    #pageLogin {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    }
+    .login-container {
+      background: white; padding: 40px; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; max-width: 90%;
+    }
+    .logo { text-align: center; margin-bottom: 30px; }
+    .logo h1 { color: #333; font-size: 28px; margin-bottom: 5px; }
+    .logo h1 span { color: #667eea; }
+    .logo p { color: #888; font-size: 14px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; font-size: 14px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0;
+      border-radius: 8px; font-size: 14px; font-family: inherit; transition: border-color 0.3s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 8px; font-size: 15px;
+      font-weight: 600; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-primary {
+      width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 14px;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 12px 30px; border: none; border-radius: 8px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.2); color: white;
+      border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px;
+      border-radius: 6px; cursor: pointer; font-size: 13px;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.3); }
+    .error-message {
+      background: #ffe0e0; color: #d63031; padding: 10px; border-radius: 8px;
+      margin-top: 15px; text-align: center; font-size: 14px; display: none;
+    }
+    .error-message.show { display: block; }
+
+    /* HEADER */
+    .header {
+      color: white; padding: 20px 30px; display: flex; justify-content: space-between;
+      align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px;
+    }
+    .header-pegawai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .header-admin { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+    .header-admin .header-left h2 { color: #e94560; }
+    .header-left h2 { font-size: 22px; }
+    .header-left p { font-size: 13px; opacity: 0.9; }
+    .header-right { display: flex; align-items: center; gap: 15px; }
+
+    /* CONTAINER & CARD */
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .card {
+      background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 25px; margin-bottom: 25px;
+    }
+    .card h3 {
+      color: #333; margin-bottom: 20px; padding-bottom: 10px;
+      border-bottom: 2px solid #667eea; display: inline-block;
+    }
+    #pageAdmin .card h3 { border-bottom-color: #e94560; }
+
+    /* FORM */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .radio-group { display: flex; gap: 20px; padding-top: 5px; }
+    .radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; }
+    .radio-group input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+    .tujuan-detail { display: none; }
+    .tujuan-detail.show { display: block; }
+
+    /* TABLE */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    th {
+      background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px;
+      color: #555; border-bottom: 2px solid #dee2e6;
+    }
+    #pageAdmin th { background: #1a1a2e; color: white; }
+    td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #eee; }
+    tr:hover { background: #f8f9fa; }
+
+    /* BADGE */
+    .badge {
+      padding: 4px 10px; border-radius: 12px; font-size: 11px;
+      font-weight: 600; display: inline-block;
+    }
+    .badge-menunggu { background: #fff3cd; color: #856404; }
+    .badge-disetujui { background: #d4edda; color: #155724; }
+    .badge-ditolak { background: #f8d7da; color: #721c24; }
+    .badge-selesai { background: #cce5ff; color: #004085; }
+
+    /* BUTTON AKSI */
+    .btn-aksi {
+      padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 11px; font-weight: 600; margin-right: 5px; margin-bottom: 3px; transition: opacity 0.2s;
+    }
+    .btn-aksi:hover { opacity: 0.8; }
+    .btn-setujui { background: #27ae60; color: white; }
+    .btn-tolak { background: #e74c3c; color: white; }
+    .btn-selesai { background: #2980b9; color: white; }
+
+    /* RINGKASAN */
+    .ringkasan-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px; margin-bottom: 25px;
+    }
+    .ringkasan-card {
+      background: white; padding: 20px; border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center;
+    }
+    .ringkasan-card h4 { font-size: 13px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+    .ringkasan-card .angka { font-size: 36px; font-weight: bold; }
+    .ringkasan-card.tersedia .angka { color: #27ae60; }
+    .ringkasan-card.dipakai .angka { color: #e74c3c; }
+    .ringkasan-card.menunggu .angka { color: #f39c12; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 10px 20px; background: #e0e0e0; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600; font-size: 13px; transition: background 0.3s;
+    }
+    .tab-btn.active { background: #e94560; color: white; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; }
+    .modal h4 { margin-bottom: 20px; }
+    .modal textarea {
+      width: 100%; padding: 10px; border: 2px solid #e0e0e0;
+      border-radius: 8px; min-height: 80px; font-family: inherit;
+    }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
+    .modal-buttons button {
+      padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
+    }
+
+    /* ALERT */
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
+    .alert.show { display: block; }
+    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .header { flex-direction: column; text-align: center; }
+      .header-right { flex-direction: column; gap: 5px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div id="banner" class="header-banner">
-    <h3>Polling Pegawai Terbaik PPNPN</h3>
-    <p id="sub-banner">Silakan lengkapi data dan penilaian Anda</p>
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Memproses...</p>
   </div>
-  
-  <div class="card-body">
-    <form id="pollingForm" onsubmit="submitData(event)">
-      
-      <h5 class="section-title">Identitas Responden</h5>
-      <div class="form-group">
-        <label class="fw-bold">NIP (9 Digit)</label>
-        <input type="text" id="nip" pattern="\d{9}" maxlength="9" placeholder="Masukkan 9 digit NIP" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-      </div>
-      <div class="form-group">
-        <label class="fw-bold">Unit Organisasi (Seksi)</label>
-        <select id="seksi" required>
-          <option value="" selected disabled>-- Pilih Seksi --</option>
-          <option value="Subbagian Umum dan Kepatuhan Internal">Subbagian Umum dan Kepatuhan Internal</option>
-          <option value="Seksi Penjamin Kualitas Data">Seksi Penjamin Kualitas Data</option>
-          <option value="Seksi Pelayanan">Seksi Pelayanan</option>
-          <option value="Seksi Pemeriksaan, Penilaian, dan Penagihan">Seksi Pemeriksaan, Penilaian, dan Penagihan</option>
-          <option value="Seksi Pengawasan I">Seksi Pengawasan I</option>
-          <option value="Seksi Pengawasan II">Seksi Pengawasan II</option>
-          <option value="Seksi Pengawasan III">Seksi Pengawasan III</option>
-          <option value="Seksi Pengawasan IV">Seksi Pengawasan IV</option>
-          <option value="Seksi Pengawasan V">Seksi Pengawasan V</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="fw-bold">Kategori Pegawai Yang Dinilai</label>
-        <select id="kategori" onchange="ubahKategori(this.value)" required>
-          <option value="" selected disabled>-- Pilih Kategori --</option>
-          <option value="cs">Cleaning Service</option>
-          <option value="security">Security (Satpam)</option>
-        </select>
-      </div>
 
-      <div id="penilaian-section" style="display:none;">
-        <br>
-        <h5 class="section-title" id="title-penilaian">Daftar Pegawai</h5>
-        <div id="pegawai-container"></div>
-        <button type="submit" id="btnSubmit" class="btn-submit">Kirim Penilaian</button>
+  <!-- ==================== HALAMAN LOGIN ==================== -->
+  <div id="pageLogin">
+    <div class="login-container">
+      <div class="logo">
+        <h1><span>SiMoDi</span></h1>
+        <p>Sistem Peminjaman Mobil Dinas</p>
       </div>
-    </form>
+      <div class="form-group">
+        <label for="nip">NIP</label>
+        <input type="text" id="nip" placeholder="Masukkan NIP" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Masukkan Password" autocomplete="off">
+      </div>
+      <button class="btn btn-primary" id="btnLogin" onclick="handleLogin()">Masuk</button>
+      <div class="error-message" id="errorLogin"></div>
+    </div>
   </div>
-</div>
 
-<script>
-  // Database Master Data Pegawai PPNPN dengan Nama CS Terbaru
-  const masterData = {
-    cs: {
-      kriteria: [
-        { key: "k1", label: "1. Kualitas Kebersihan" },
-        { key: "k2", label: "2. Kedisiplinan" },
-        { key: "k3", label: "3. Tanggung Jawab" },
-        { key: "k4", label: "4. Sikap dan Perilaku" }
-      ],
-      pegawai: [
-        { id: 1, nama: "Andang Kusnandar", foto: "https://i.ibb.co.com/93t8bqFb/Andang.jpg" },
-        { id: 2, nama: "Dede Saripudin", foto: "https://i.ibb.co.com/xthYK658/Dede.png" },
-        { id: 3, nama: "Mustikandryna Okeu Imalyana", foto: "https://i.ibb.co.com/qv5KVH8/Mustika.png" },
-        { id: 4, nama: "Arif Saefudin", foto: "https://i.ibb.co.com/SD4Zw9h6/Arif.png" },
-        { id: 5, nama: "Latief Maulana", foto: "https://i.ibb.co.com/G4xrxWv8/Latief.png" },
-        { id: 6, nama: "Sopiyan Sopandi", foto: "https://via.placeholder.com/150" },
-        { id: 7, nama: "Prastyo Panca Putra", foto: "https://i.ibb.co.com/YFmpFBwv/Prasetyo.png" },
-        { id: 8, nama: "Yuyun Yunengsih", foto: "https://i.ibb.co.com/R4gk70M5/Yuyun.png" },
-        { id: 9, nama: "Vina Valentina", foto: "https://i.ibb.co.com/GDkbw26/Vina.png" }
-      ]
-    },
-    security: {
-      kriteria: [
-        { key: "k1", label: "1. Disiplin" },
-        { key: "k2", label: "2. Sikap dan Keramahan" },
-        { key: "k3", label: "3. Responsif" },
-        { key: "k4", label: "4. Tanggung Jawab" }
-      ],
-      pegawai: [
-        { id: 1, nama: "Nono Suhartono", foto: "https://i.ibb.co.com/ksq8ZwsB/Nono.png" },
-        { id: 2, nama: "Rahmat Hidayat", foto: "https://i.ibb.co.com/Z6gRPzQR/Rahmat.png" },
-        { id: 3, nama: "Teten Hermawan", foto: "https://i.ibb.co.com/9kNcpScq/Teten.png" },
-        { id: 4, nama: "Alit Supriatna", foto: "https://i.ibb.co.com/7x2jDcYq/Alif.png" },
-        { id: 5, nama: "Salman Mulyono", foto: "https://i.ibb.co.com/kgsHcXDY/Salman.png" },
-        { id: 6, nama: "Entis Sutisna", foto: "https://i.ibb.co.com/YTJPRm6K/Entis.png" },
-        { id: 7, nama: "Yulia Nendasari", foto: "https://i.ibb.co.com/rfN9z7bH/Yulia.png" },
-        { id: 8, nama: "Fajar Gilang Oktiana", foto: "https://i.ibb.co.com/6cWbMBrj/Fajar.png" },
-        { id: 9, nama: "Didin Nurdiansyah", foto: "https://i.ibb.co.com/t0x9VY6/Didin.png" },
-        { id: 10, nama: "Wartono", foto: "https://i.ibb.co.com/t0x9VY6/Didin.png" }
-
-      ]
-    }
-  };
-
-  function ubahKategori(kat) {
-    if(!kat) return;
+  <!-- ==================== HALAMAN PEGAWAI ==================== -->
+  <div id="pagePegawai" class="hidden">
+    <div class="header header-pegawai">
+      <div class="header-left">
+        <h2>SiMoDi</h2>
+        <p id="infoPegawai"></p>
+      </div>
+      <div class="header-right">
+        <span id="namaPegawai"></span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
     
-    let banner = document.getElementById('banner');
-    let subBanner = document.getElementById('sub-banner');
-    let titlePenilaian = document.getElementById('title-penilaian');
-    
-    if(kat === 'cs') {
-      banner.style.backgroundColor = '#004a99';
-      subBanner.innerText = "Kategori: Cleaning Service";
-      titlePenilaian.innerText = "Penilaian Pegawai Cleaning Service (9 Orang)";
-    } else {
-      banner.style.backgroundColor = '#d35400';
-      subBanner.innerText = "Kategori: Security (Satpam)";
-      titlePenilaian.innerText = "Penilaian Personel Security (9 Orang)";
-    }
-    
-    renderCards(kat);
-    document.getElementById('penilaian-section').style.display = 'block';
-  }
-
-  function renderCards(kat) {
-    let target = masterData[kat];
-    let html = '';
-    
-    target.pegawai.forEach(function(p) {
-      html += '<div class="card-cs">';
-      html += '<div class="cs-profile">';
-      html += '<img src="' + p.foto + '" alt="Foto ' + p.nama + '">';
-      html += '<h4>' + p.nama + '</h4>';
-      html += '</div>';
-      html += '<hr class="divider">';
+    <div class="container">
+      <div class="alert" id="alertPegawai"></div>
       
-      target.kriteria.forEach(function(k) {
-        html += '<div class="kriteria-row">';
-        html += '<div class="kriteria-label">' + k.label + '</div>';
-        html += '<div class="star-rating">';
-        for(let i=5; i>=1; i--) {
-          let rId = 'star_' + i + '_' + k.key + '_' + p.id;
-          let rName = k.key + '_' + p.id;
-          html += '<input type="radio" id="' + rId + '" name="' + rName + '" value="' + i + '" required>';
-          html += '<label for="' + rId + '">★</label>';
-        }
-        html += '</div></div>';
-      });
-
-      html += '<div class="kriteria-row" style="margin-top:15px;">';
-      html += '<label class="kriteria-label">Masukan / Saran:</label>';
-      html += '<textarea id="masukan_' + p.id + '" rows="2" placeholder="Tuliskan masukan untuk ' + p.nama + '..."></textarea>';
-      html += '</div>';
-      html += '</div>';
-    });
-    
-    document.getElementById('pegawai-container').innerHTML = html;
-  }
-
-  function submitData(e) {
-    e.preventDefault();
-    let btn = document.getElementById('btnSubmit');
-    let kat = document.getElementById('kategori').value;
-    btn.disabled = true;
-    btn.innerText = "Menyimpan Data...";
-
-    let payload = {
-      nip: document.getElementById('nip').value,
-      seksi: document.getElementById('seksi').value,
-      kategori: kat,
-      penilaian: []
-    };
-
-    try {
-      masterData[kat].pegawai.forEach(function(p) {
-        let v1 = document.querySelector('input[name="k1_' + p.id + '"]:checked').value;
-        let v2 = document.querySelector('input[name="k2_' + p.id + '"]:checked').value;
-        let v3 = document.querySelector('input[name="k3_' + p.id + '"]:checked').value;
-        let v4 = document.querySelector('input[name="k4_' + p.id + '"]:checked').value;
-        let msk = document.getElementById('masukan_' + p.id).value;
+      <!-- FORM PEMINJAMAN -->
+      <div class="card">
+        <h3>Form Peminjaman Mobil</h3>
         
-        payload.penilaian.push({
-          namaPegawai: p.nama, kriteria1: v1, kriteria2: v2, kriteria3: v3, kriteria4: v4, masukan: msk
-        });
-      });
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mobil">Pilih Mobil</label>
+            <select id="mobil">
+              <option value="">-- Memuat data mobil --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenis Tujuan</label>
+            <div class="radio-group">
+              <label>
+                <input type="radio" name="tujuan" value="dalam_kota" checked onchange="toggleTujuan()"> Dalam Kota
+              </label>
+              <label>
+                <input type="radio" name="tujuan" value="luar_kota" onchange="toggleTujuan()"> Luar Kota
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tglPinjam">Tanggal Pinjam</label>
+            <input type="date" id="tglPinjam">
+          </div>
+          <div class="form-group">
+            <label for="jamPinjam">Jam Pinjam</label>
+            <input type="time" id="jamPinjam">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tglKembali">Tanggal Kembali</label>
+            <input type="date" id="tglKembali">
+          </div>
+          <div class="form-group">
+            <label for="jamKembali">Jam Kembali</label>
+            <input type="time" id="jamKembali">
+          </div>
+        </div>
+        
+        <!-- Detail Dalam Kota -->
+        <div class="form-row full tujuan-detail show" id="detailDalamKota">
+          <div class="form-group">
+            <label for="tujuanDalamKota">Detail Tujuan Dalam Kota</label>
+            <textarea id="tujuanDalamKota" placeholder="Contoh: Rapat di Dinas Pendidikan, Jl. Merdeka No.10"></textarea>
+          </div>
+        </div>
+        
+        <!-- Detail Luar Kota -->
+        <div class="form-row full tujuan-detail" id="detailLuarKota">
+          <div class="form-group">
+            <label for="kotaTujuan">Kota Tujuan</label>
+            <input type="text" id="kotaTujuan" placeholder="Contoh: Bandung">
+          </div>
+          <div class="form-group">
+            <label for="kegiatanLuarKota">Detail Kegiatan</label>
+            <textarea id="kegiatanLuarKota" placeholder="Contoh: Monitoring proyek pembangunan"></textarea>
+          </div>
+        </div>
+        
+        <button class="btn-submit" id="btnSubmit" onclick="ajukanPeminjaman()">Ajukan Peminjaman</button>
+      </div>
+      
+      <!-- RIWAYAT -->
+      <div class="card">
+        <h3>Riwayat Peminjaman Saya</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th><th>Mobil</th><th>Tgl Pinjam</th><th>Tgl Kembali</th>
+                <th>Tujuan</th><th>Detail</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tableRiwayat">
+              <tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      google.script.run.withSuccessHandler(function(res) {
-        if(res === "SUCCESS") {
-          alert("Terima kasih! Polling berhasil disimpan.");
-          document.getElementById('pollingForm').reset();
-          document.getElementById('penilaian-section').style.display = 'none';
-          window.scrollTo(0,0);
-        } else {
-          alert("Gagal menyimpan: " + res);
+  <!-- ==================== HALAMAN ADMIN ==================== -->
+  <div id="pageAdmin" class="hidden">
+    <div class="header header-admin">
+      <div class="header-left">
+        <h2>SiMoDi - Admin Panel</h2>
+      </div>
+      <div class="header-right">
+        <span id="namaAdmin"></span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+    
+    <div class="container">
+      <div class="alert" id="alertAdmin"></div>
+      
+      <!-- RINGKASAN -->
+      <div class="ringkasan-row">
+        <div class="ringkasan-card tersedia">
+          <h4>Mobil Tersedia</h4>
+          <div class="angka" id="jmlTersedia">-</div>
+        </div>
+        <div class="ringkasan-card dipakai">
+          <h4>Sedang Dipakai</h4>
+          <div class="angka" id="jmlDipakai">-</div>
+        </div>
+        <div class="ringkasan-card menunggu">
+          <h4>Menunggu Persetujuan</h4>
+          <div class="angka" id="jmlMenunggu">-</div>
+        </div>
+      </div>
+      
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('menunggu', this)">Persetujuan</button>
+        <button class="tab-btn" onclick="switchTab('disetujui', this)">Sedang Dipinjam</button>
+        <button class="tab-btn" onclick="switchTab('semua', this)">Semua Riwayat</button>
+      </div>
+      
+      <!-- CARD PERSETUJUAN -->
+      <div class="card" id="cardMenunggu">
+        <h3>Daftar Persetujuan Peminjaman</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th><th>NIP / Nama</th><th>Unit / Seksi</th><th>Mobil</th>
+                <th>Tgl Pinjam - Kembali</th><th>Tujuan</th><th>Detail</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableMenunggu">
+              <tr><td colspan="8" style="text-align:center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- CARD SEDANG DIPINJAM -->
+      <div class="card hidden" id="cardDisetujui">
+        <h3>Daftar Mobil Sedang Dipinjam</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th><th>Nama Peminjam</th><th>Mobil</th>
+                <th>Tgl Pinjam - Kembali</th><th>Tujuan</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableDisetujui">
+              <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- CARD SEMUA RIWAYAT -->
+      <div class="card hidden" id="cardSemua">
+        <h3>Semua Riwayat Peminjaman</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th><th>Nama Peminjam</th><th>Unit</th><th>Mobil</th>
+                <th>Tgl Pinjam - Kembali</th><th>Tujuan</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tableSemua">
+              <tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TOLAK -->
+  <div class="modal-overlay" id="modalTolak">
+    <div class="modal">
+      <h4>Alasan Penolakan</h4>
+      <textarea id="alasanTolak" placeholder="Masukkan alasan penolakan..."></textarea>
+      <div class="modal-buttons">
+        <button onclick="closeModalTolak()" style="background:#95a5a6;color:white;">Batal</button>
+        <button onclick="konfirmasiTolak()" style="background:#e74c3c;color:white;">Tolak</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== GLOBAL VARIABLES ====================
+    let currentToken = null;
+    let currentUser = null;
+    let selectedIdTolak = null;
+
+    // ==================== LOADING HELPERS ====================
+    function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
+    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+    // ==================== INISIALISASI ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      // LANGSUNG TAMPILKAN LOGIN
+      showLogin();
+      
+      // Enter key untuk login
+      document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('pageLogin').classList.contains('hidden')) {
+          handleLogin();
         }
-        btn.disabled = false;
-        btn.innerText = "Kirim Penilaian";
-      }).simpanPolling(payload);
+      });
+    });
 
-    } catch(err) {
-      alert("Mohon pastikan seluruh bintang penilaian sudah terisi.");
-      btn.disabled = false;
-      btn.innerText = "Kirim Penilaian";
+    // ==================== NAVIGASI HALAMAN ====================
+    function showLogin() {
+      document.getElementById('pageLogin').classList.remove('hidden');
+      document.getElementById('pagePegawai').classList.add('hidden');
+      document.getElementById('pageAdmin').classList.add('hidden');
+      currentToken = null;
+      currentUser = null;
+      localStorage.removeItem('simoDiToken');
     }
-  }
-</script>
+
+    function showPegawaiDashboard() {
+      document.getElementById('pageLogin').classList.add('hidden');
+      document.getElementById('pagePegawai').classList.remove('hidden');
+      document.getElementById('pageAdmin').classList.add('hidden');
+      
+      document.getElementById('namaPegawai').innerText = currentUser.nama;
+      document.getElementById('infoPegawai').innerText = 'Selamat Datang, ' + currentUser.nama + ' | Unit: ' + currentUser.unit;
+      
+      // Set tanggal default
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tglPinjam').value = today;
+      document.getElementById('tglKembali').value = today;
+      document.getElementById('jamPinjam').value = '08:00';
+      document.getElementById('jamKembali').value = '12:00';
+      
+      // Load data
+      loadMobilTersedia();
+      loadRiwayat();
+    }
+
+    function showAdminDashboard() {
+      document.getElementById('pageLogin').classList.add('hidden');
+      document.getElementById('pagePegawai').classList.add('hidden');
+      document.getElementById('pageAdmin').classList.remove('hidden');
+      
+      document.getElementById('namaAdmin').innerText = currentUser.nama;
+      
+      // Reset tabs
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.tab-btn').classList.add('active');
+      document.getElementById('cardMenunggu').classList.remove('hidden');
+      document.getElementById('cardDisetujui').classList.add('hidden');
+      document.getElementById('cardSemua').classList.add('hidden');
+      
+      loadRingkasan();
+      loadDataMenunggu();
+    }
+
+    // ==================== LOGIN ====================
+    function handleLogin() {
+      const nip = document.getElementById('nip').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorDiv = document.getElementById('errorLogin');
+      const btnLogin = document.getElementById('btnLogin');
+      
+      errorDiv.classList.remove('show');
+      errorDiv.innerText = '';
+      
+      if (!nip || !password) {
+        errorDiv.innerText = 'NIP dan Password harus diisi.';
+        errorDiv.classList.add('show');
+        return;
+      }
+      
+      showLoading();
+      btnLogin.disabled = true;
+      btnLogin.innerText = 'Memproses...';
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          btnLogin.disabled = false;
+          btnLogin.innerText = 'Masuk';
+          
+          if (res.success) {
+            currentToken = res.token;
+            currentUser = { role: res.role, nama: res.nama, unit: res.unit };
+            localStorage.setItem('simoDiToken', res.token);
+            
+            document.getElementById('nip').value = '';
+            document.getElementById('password').value = '';
+            
+            if (res.role === 'pegawai') {
+              showPegawaiDashboard();
+            } else if (res.role === 'admin') {
+              showAdminDashboard();
+            }
+          } else {
+            errorDiv.innerText = res.message;
+            errorDiv.classList.add('show');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideLoading();
+          btnLogin.disabled = false;
+          btnLogin.innerText = 'Masuk';
+          errorDiv.innerText = 'Gagal koneksi. Coba lagi.';
+          errorDiv.classList.add('show');
+          console.error('Login error:', err);
+        })
+        .login(nip, password);
+    }
+
+    // ==================== LOGOUT ====================
+    function handleLogout() {
+      showLoading();
+      if (currentToken) {
+        google.script.run
+          .withSuccessHandler(function() { hideLoading(); showLogin(); })
+          .withFailureHandler(function() { hideLoading(); showLogin(); })
+          .logout(currentToken);
+      } else {
+        hideLoading();
+        showLogin();
+      }
+    }
+
+    // ==================== PEGAWAI: LOAD MOBIL TERSEDIA ====================
+    function loadMobilTersedia() {
+      const select = document.getElementById('mobil');
+      select.innerHTML = '<option value="">-- Memuat data mobil --</option>';
+      
+      google.script.run
+        .withSuccessHandler(function(list) {
+          console.log('Mobil tersedia:', JSON.stringify(list));
+          
+          select.innerHTML = '<option value="">-- Pilih Mobil --</option>';
+          
+          if (!list || list.length === 0) {
+            select.innerHTML += '<option value="" disabled>Tidak ada mobil tersedia</option>';
+            return;
+          }
+          
+          list.forEach(function(m) {
+            select.innerHTML += '<option value="' + m.id + '">' + m.nama + ' (' + m.plat + ')</option>';
+          });
+        })
+        .withFailureHandler(function(err) {
+          console.error('Gagal load mobil:', err);
+          select.innerHTML = '<option value="">-- Gagal memuat, refresh halaman --</option>';
+        })
+        .getMobilTersedia();
+    }
+
+    // ==================== PEGAWAI: TOGGLE TUJUAN ====================
+    function toggleTujuan() {
+      const selected = document.querySelector('input[name="tujuan"]:checked').value;
+      document.getElementById('detailDalamKota').classList.remove('show');
+      document.getElementById('detailLuarKota').classList.remove('show');
+      
+      if (selected === 'dalam_kota') {
+        document.getElementById('detailDalamKota').classList.add('show');
+      } else {
+        document.getElementById('detailLuarKota').classList.add('show');
+      }
+    }
+
+    // ==================== PEGAWAI: AJUKAN PEMINJAMAN ====================
+    function ajukanPeminjaman() {
+      const idMobil = document.getElementById('mobil').value;
+      const tglPinjam = document.getElementById('tglPinjam').value;
+      const jamPinjam = document.getElementById('jamPinjam').value;
+      const tglKembali = document.getElementById('tglKembali').value;
+      const jamKembali = document.getElementById('jamKembali').value;
+      const jenisTujuan = document.querySelector('input[name="tujuan"]:checked').value;
+      
+      let detailTujuan = '';
+      if (jenisTujuan === 'dalam_kota') {
+        detailTujuan = document.getElementById('tujuanDalamKota').value.trim();
+      } else {
+        const kota = document.getElementById('kotaTujuan').value.trim();
+        const kegiatan = document.getElementById('kegiatanLuarKota').value.trim();
+        detailTujuan = 'Kota ' + kota + ' - ' + kegiatan;
+      }
+      
+      // Validasi
+      if (!idMobil) {
+        showAlertPegawai('Silakan pilih mobil.', 'error');
+        return;
+      }
+      if (!tglPinjam || !jamPinjam || !tglKembali || !jamKembali) {
+        showAlertPegawai('Tanggal dan jam harus diisi lengkap.', 'error');
+        return;
+      }
+      if (!detailTujuan || detailTujuan === 'Kota  - ') {
+        showAlertPegawai('Detail tujuan harus diisi.', 'error');
+        return;
+      }
+      
+      const pinjam = new Date(tglPinjam + 'T' + jamPinjam);
+      const kembali = new Date(tglKembali + 'T' + jamKembali);
+      if (pinjam >= kembali) {
+        showAlertPegawai('Tanggal/jam kembali harus setelah pinjam.', 'error');
+        return;
+      }
+      
+      showLoading();
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerText = 'Mengirim...';
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          btn.disabled = false;
+          btn.innerText = 'Ajukan Peminjaman';
+          
+          if (res.success) {
+            showAlertPegawai(res.message, 'success');
+            // Reset form
+            document.getElementById('tujuanDalamKota').value = '';
+            document.getElementById('kotaTujuan').value = '';
+            document.getElementById('kegiatanLuarKota').value = '';
+            loadMobilTersedia();
+            loadRiwayat();
+          } else {
+            showAlertPegawai(res.message, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideLoading();
+          btn.disabled = false;
+          btn.innerText = 'Ajukan Peminjaman';
+          showAlertPegawai('Gagal mengirim: ' + err.message, 'error');
+        })
+        .ajukanPeminjaman(currentToken, idMobil, tglPinjam, jamPinjam, tglKembali, jamKembali, jenisTujuan, detailTujuan);
+    }
+
+    // ==================== PEGAWAI: LOAD RIWAYAT ====================
+    function loadRiwayat() {
+      const tbody = document.getElementById('tableRiwayat');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>';
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Belum ada riwayat peminjaman.</td></tr>';
+            return;
+          }
+          
+          let html = '';
+          data.forEach(function(item, i) {
+            const badgeClass = {
+              menunggu: 'badge-menunggu',
+              disetujui: 'badge-disetujui',
+              ditolak: 'badge-ditolak',
+              selesai: 'badge-selesai'
+            }[item.status] || '';
+            
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            html += '<td>' + item.namaMobil + '<br><small>' + item.platMobil + '</small></td>';
+            html += '<td>' + item.tglPinjam + '<br><small>' + item.jamPinjam + '</small></td>';
+            html += '<td>' + item.tglKembali + '<br><small>' + item.jamKembali + '</small></td>';
+            html += '<td>' + (item.jenisTujuan === 'dalam_kota' ? 'Dalam Kota' : 'Luar Kota') + '</td>';
+            html += '<td>' + item.detailTujuan + '</td>';
+            html += '<td><span class="badge ' + badgeClass + '">' + item.status.toUpperCase() + '</span></td>';
+            html += '</tr>';
+          });
+          
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        })
+        .getRiwayatPeminjaman(currentToken);
+    }
+
+    function showAlertPegawai(msg, type) {
+      const el = document.getElementById('alertPegawai');
+      el.innerText = msg;
+      el.className = 'alert alert-' + type + ' show';
+      setTimeout(function() { el.classList.remove('show'); }, 5000);
+    }
+
+    // ==================== ADMIN: LOAD RINGKASAN ====================
+    function loadRingkasan() {
+      google.script.run
+        .withSuccessHandler(function(list) {
+          let tersedia = 0, dipakai = 0;
+          if (Array.isArray(list)) {
+            list.forEach(function(m) {
+              if (m.status === 'tersedia') tersedia++;
+              else if (m.status === 'dipakai') dipakai++;
+            });
+          }
+          document.getElementById('jmlTersedia').innerText = tersedia;
+          document.getElementById('jmlDipakai').innerText = dipakai;
+        })
+        .withFailureHandler(function() {
+          document.getElementById('jmlTersedia').innerText = '?';
+          document.getElementById('jmlDipakai').innerText = '?';
+        })
+        .getRingkasanMobil(currentToken);
+      
+      google.scriptRun
+        .withSuccessHandler(function(data) {
+          document.getElementById('jmlMenunggu').innerText = Array.isArray(data) ? data.length : '?';
+        })
+        .withFailureHandler(function() {
+          document.getElementById('jmlMenunggu').innerText = '?';
+        })
+        .getPengajuanMenunggu(currentToken);
+    }
+
+    // ==================== ADMIN: LOAD DATA MENUNGGU ====================
+    function loadDataMenunggu() {
+      const tbody = document.getElementById('tableMenunggu');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Memuat data...</td></tr>';
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data && data.error) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">' + data.message + '</td></tr>';
+            return;
+          }
+          
+          if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tidak ada pengajuan menunggu.</td></tr>';
+            document.getElementById('jmlMenunggu').innerText = '0';
+            return;
+          }
+          
+          let html = '';
+          data.forEach(function(item, i) {
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            html += '<td><strong>' + item.namaPegawai + '</strong><br><small>NIP: ' + item.idPegawai + '</small></td>';
+            html += '<td>' + item.unitPegawai + '<br><small>' + item.seksiPegawai + '</small></td>';
+            html += '<td>' + item.namaMobil + '<br><small>' + item.platMobil + '</small></td>';
+            html += '<td>' + item.tglPinjam + ' ' + item.jamPinjam + '<br>s/d<br>' + item.tglKembali + ' ' + item.jamKembali + '</td>';
+            html += '<td>' + (item.jenisTujuan === 'dalam_kota' ? 'Dalam Kota' : 'Luar Kota') + '</td>';
+            html += '<td>' + item.detailTujuan + '</td>';
+            html += '<td>';
+            html += '<button class="btn-aksi btn-setujui" onclick="setujui(' + item.id + ')">Setujui</button>';
+            html += '<button class="btn-aksi btn-tolak" onclick="bukaModalTolak(' + item.id + ')">Tolak</button>';
+            html += '</td>';
+            html += '</tr>';
+          });
+          
+          tbody.innerHTML = html;
+          document.getElementById('jmlMenunggu').innerText = data.length;
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        })
+        .getPengajuanMenunggu(currentToken);
+    }
+
+    // ==================== ADMIN: LOAD DATA DISETUJUI ====================
+    function loadDataDisetujui() {
+      const tbody = document.getElementById('tableDisetujui');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>';
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          const list = Array.isArray(data) ? data.filter(item => item.status === 'disetujui') : [];
+          
+          if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tidak ada mobil sedang dipinjam.</td></tr>';
+            return;
+          }
+          
+          let html = '';
+          list.forEach(function(item, i) {
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            html += '<td>' + item.namaPegawai + '</td>';
+            html += '<td>' + item.namaMobil + ' (' + item.platMobil + ')</td>';
+            html += '<td>' + item.tglPinjam + ' ' + item.jamPinjam + ' - ' + item.tglKembali + ' ' + item.jamKembali + '</td>';
+            html += '<td>' + item.detailTujuan + '</td>';
+            html += '<td><button class="btn-aksi btn-selesai" onclick="konfirmasiSelesai(' + item.id + ')">Selesai</button></td>';
+            html += '</tr>';
+          });
+          
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        })
+        .getAllPeminjaman(currentToken);
+    }
+
+    // ==================== ADMIN: LOAD SEMUA DATA ====================
+    function loadDataSemua() {
+      const tbody = document.getElementById('tableSemua');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Memuat data...</td></tr>';
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!Array.isArray(data) || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Belum ada data peminjaman.</td></tr>';
+            return;
+          }
+          
+          let html = '';
+          data.forEach(function(item, i) {
+            const badgeClass = {
+              menunggu: 'badge-menunggu',
+              disetujui: 'badge-disetujui',
+              ditolak: 'badge-ditolak',
+              selesai: 'badge-selesai'
+            }[item.status] || '';
+            
+            html += '<tr>';
+            html += '<td>' + (i + 1) + '</td>';
+            html += '<td>' + item.namaPegawai + '</td>';
+            html += '<td>' + item.unitPegawai + '</td>';
+            html += '<td>' + item.namaMobil + '</td>';
+            html += '<td>' + item.tglPinjam + ' - ' + item.tglKembali + '</td>';
+            html += '<td>' + item.detailTujuan + '</td>';
+            html += '<td><span class="badge ' + badgeClass + '">' + item.status.toUpperCase() + '</span></td>';
+            html += '</tr>';
+          });
+          
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;">Gagal memuat data.</td></tr>';
+        })
+        .getAllPeminjaman(currentToken);
+    }
+
+    // ==================== ADMIN: AKSI ====================
+    function setujui(id) {
+      if (!confirm('Setujui peminjaman ini?')) return;
+      
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          if (res.success) {
+            showAlertAdmin(res.message, 'success');
+            loadRingkasan();
+            loadDataMenunggu();
+          } else {
+            showAlertAdmin(res.message, 'error');
+          }
+        })
+        .withFailureHandler(function() {
+          hideLoading();
+          showAlertAdmin('Gagal memproses.', 'error');
+        })
+        .setujuiPeminjaman(currentToken, id);
+    }
+
+    function bukaModalTolak(id) {
+      selectedIdTolak = id;
+      document.getElementById('modalTolak').classList.add('show');
+      document.getElementById('alasanTolak').value = '';
+    }
+
+    function closeModalTolak() {
+      document.getElementById('modalTolak').classList.remove('show');
+      selectedIdTolak = null;
+    }
+
+    function konfirmasiTolak() {
+      if (!selectedIdTolak) return;
+      
+      const alasan = document.getElementById('alasanTolak').value.trim() || 'Tanpa alasan';
+      
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          closeModalTolak();
+          if (res.success) {
+            showAlertAdmin(res.message, 'success');
+            loadRingkasan();
+            loadDataMenunggu();
+          } else {
+            showAlertAdmin(res.message, 'error');
+          }
+        })
+        .withFailureHandler(function() {
+          hideLoading();
+          closeModalTolak();
+          showAlertAdmin('Gagal memproses.', 'error');
+        })
+        .tolakPeminjaman(currentToken, selectedIdTolak, alasan);
+    }
+
+    function konfirmasiSelesai(id) {
+      if (!confirm('Konfirmasi mobil sudah kembali?')) return;
+      
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          if (res.success) {
+            showAlertAdmin(res.message, 'success');
+            loadRingkasan();
+            loadDataDisetujui();
+          } else {
+            showAlertAdmin(res.message, 'error');
+          }
+        })
+        .withFailureHandler(function() {
+          hideLoading();
+          showAlertAdmin('Gagal memproses.', 'error');
+        })
+        .konfirmasiSelesai(currentToken, id);
+    }
+
+    // ==================== ADMIN: SWITCH TAB ====================
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      document.getElementById('cardMenunggu').classList.add('hidden');
+      document.getElementById('cardDisetujui').classList.add('hidden');
+      document.getElementById('cardSemua').classList.add('hidden');
+      
+      if (tab === 'menunggu') {
+        document.getElementById('cardMenunggu').classList.remove('hidden');
+        loadDataMenunggu();
+      } else if (tab === 'disetujui') {
+        document.getElementById('cardDisetujui').classList.remove('hidden');
+        loadDataDisetujui();
+      } else {
+        document.getElementById('cardSemua').classList.remove('hidden');
+        loadDataSemua();
+      }
+    }
+
+    function showAlertAdmin(msg, type) {
+      const el = document.getElementById('alertAdmin');
+      el.innerText = msg;
+      el.className = 'alert alert-' + type + ' show';
+      setTimeout(function() { el.classList.remove('show'); }, 5000);
+    }
+  </script>
 </body>
 </html>
