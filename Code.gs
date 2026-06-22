@@ -1,5 +1,5 @@
 // ==================== KONFIGURASI ====================
-const SPREADSHEET_ID = '1wMJiygiGdluA5-QwO95DwDOuM98PYQXg7JICw82WP1k'; // GANTI
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // GANTI
 const sheetPegawai = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('PEGAWAI');
 const sheetMobil = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('MOBIL');
 const sheetPeminjaman = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('PEMINJAMAN');
